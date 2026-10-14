@@ -1,0 +1,17 @@
+$kind: http-request
+name: http://localhost:3000/api/instituciones
+description: ""
+url: http://localhost:3000/api/instituciones
+method: POST
+body:
+  type: json
+  content: "{\r
+
+    \  \"nombre\": \"Institución Educativa San Antonio\",\r
+
+    \  \"direccion\": \"Calle 4 # 8-12\",\r
+
+    \  \"contacto\": \"Rector Wilson Orozco\"\r
+
+    }"
+order: 2000
