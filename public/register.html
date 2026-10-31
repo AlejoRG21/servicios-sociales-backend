@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Registro Docente | Community Service Tracker</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+
+  <style>
+    :root {
+      --primary: #4F46E5;
+      --primary-hover: #4338CA;
+      --bg-surface: #F8FAFC;
+    }
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background-color: var(--bg-surface);
+      color: #0F172A;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px 16px;
+    }
+    .auth-card {
+      background: #FFFFFF;
+      border-radius: 28px;
+      box-shadow: 0 10px 30px rgba(79, 70, 229, 0.08);
+      border: 1px solid #E2E8F0;
+      max-width: 440px;
+      width: 100%;
+      padding: 36px 32px;
+    }
+    .brand-icon {
+      width: 56px;
+      height: 56px;
+      background: #EEF2FF;
+      color: var(--primary);
+      border-radius: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.6rem;
+      margin-bottom: 20px;
+    }
+    .form-control {
+      border-radius: 14px;
+      padding: 12px 16px;
+      background-color: #F8FAFC;
+      border: 1px solid #E2E8F0;
+      font-size: 0.95rem;
+    }
+    .form-control:focus {
+      background-color: #FFFFFF;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.12);
+    }
+    .btn-primary-custom {
+      background-color: var(--primary);
+      color: white;
+      border-radius: 14px;
+      padding: 13px;
+      font-weight: 600;
+      border: none;
+      transition: all 0.2s;
+    }
+    .btn-primary-custom:hover {
+      background-color: var(--primary-hover);
+      transform: translateY(-1px);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="auth-card">
+    <div class="brand-icon">
+      <i class="bi bi-person-badge-fill"></i>
+    </div>
+    <h3 class="fw-bold mb-1">Registro Docente</h3>
+    <p class="text-secondary small mb-4">Crea una cuenta para validar las horas de tus estudiantes.</p>
+
+    <!-- Alertas -->
+    <div id="alertBox" class="alert alert-danger d-none py-2 px-3 small rounded-3" role="alert">
+      <i class="bi bi-exclamation-circle-fill me-1"></i> <span id="alertMsg"></span>
+    </div>
+    <div id="successBox" class="alert alert-success d-none py-2 px-3 small rounded-3" role="alert">
+      <i class="bi bi-check-circle-fill me-1"></i> <span id="successMsg"></span>
+    </div>
+
+    <form id="registerForm">
+      <div class="mb-3">
+        <label class="form-label small fw-semibold text-secondary">Nombre Completo</label>
+        <input type="text" id="name" class="form-control" placeholder="Prof. Carlos Mendoza" required autofocus>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label small fw-semibold text-secondary">Correo Institucional</label>
+        <input type="email" id="email" class="form-control" placeholder="docente@universidad.edu.co" required>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label small fw-semibold text-secondary">Departamento o Facultad</label>
+        <input type="text" id="department" class="form-control" placeholder="Facultad de Ingeniería" required>
+      </div>
+
+      <div class="mb-4">
+        <label class="form-label small fw-semibold text-secondary">Contraseña</label>
+        <input type="password" id="password" class="form-control" placeholder="Mínimo 6 caracteres" minlength="6" required>
+      </div>
+
+      <button type="submit" class="btn btn-primary-custom w-100 mb-3" id="btnSubmit">
+        <span id="btnText">Crear Cuenta Docente</span>
+        <span id="btnSpinner" class="spinner-border spinner-border-sm d-none"></span>
+      </button>
+
+      <div class="text-center">
+        <span class="small text-secondary">¿Ya tienes cuenta?</span>
+        <a href="/index.html" class="small fw-semibold text-primary text-decoration-none ms-1">Inicia Sesión</a>
+      </div>
+    </form>
+  </div>
+
+  <script>
+    document.getElementById('registerForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const name = document.getElementById('name').value.trim();
+      const email = document.getElementById('email').value.trim();
+      const department = document.getElementById('department').value.trim();
+      const password = document.getElementById('password').value;
+
+      const alertBox = document.getElementById('alertBox');
+      const successBox = document.getElementById('successBox');
+      const btnSubmit = document.getElementById('btnSubmit');
+
+      // Estado de carga
+      btnSubmit.disabled = true;
+      document.getElementById('btnText').classList.add('d-none');
+      document.getElementById('btnSpinner').classList.remove('d-none');
+      alertBox.classList.add('d-none');
+      successBox.classList.add('d-none');
+
+      try {
+        const res = await fetch('/api/auth/register-professor', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name,
+            email,
+            department,
+            password,
+            role: 'PROFESSOR' // Garantiza que nazca con rol docente
+          })
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          throw new Error(data.message || 'Error al registrar al docente');
+        }
+
+        // Mostrar éxito y redirigir
+        document.getElementById('successMsg').textContent = '¡Cuenta creada con éxito! Redirigiendo al inicio de sesión...';
+        successBox.classList.remove('d-none');
+
+        setTimeout(() => {
+          window.location.href = '/index.html';
+        }, 1800);
+
+      } catch (err) {
+        document.getElementById('alertMsg').textContent = err.message;
+        alertBox.classList.remove('d-none');
+      } finally {
+        btnSubmit.disabled = false;
+        document.getElementById('btnText').classList.remove('d-none');
+        document.getElementById('btnSpinner').classList.add('d-none');
+      }
+    });
+  </script>
+</body>
+</html>
