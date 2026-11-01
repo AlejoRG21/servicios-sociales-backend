@@ -1,4 +1,4 @@
-require('dotenv').config(); // Cargar variables de entorno desde .env
+require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
@@ -6,52 +6,38 @@ const path = require('path');
 
 const app = express();
 
-// 1. Middlewares esenciales
-app.use(cors()); // Permite conexiones desde Android Studio y navegadores
-app.use(express.json()); // Permite recibir JSON en los POST y PUT
+// 1. Middlewares obligatorios
+app.use(cors()); // Permite peticiones desde Android Studio y la web
+app.use(express.json()); // Permite recibir cuerpos JSON en POST/PUT
 app.use(express.urlencoded({ extended: true }));
 
-// 2. Servir la web del profesor (carpeta public)
+// 2. Servir la carpeta de la web docente
 app.use(express.static(path.join(__dirname, 'public')));
 
-// 3. Conexión a MongoDB (Local o MongoDB Atlas en la nube)
+// 3. Conexión a MongoDB (Usa variable en .env o base de datos local por defecto)
 const MONGO_URI = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/servicios_sociales';
 
 mongoose.connect(MONGO_URI)
-  .then(() => console.log(' Conectado exitosamente a MongoDB'))
+  .then(() => console.log('✅ Conectado exitosamente a MongoDB'))
   .catch((err) => console.error('❌ Error conectando a MongoDB:', err.message));
 
-// 4. Rutas de la API (Para Android Studio y la Web)
+// 4. Rutas de la API (Consumidas por Android y la Web)
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/services', require('./routes/services'));
 
-// Ruta raíz por defecto (Carga el login del docente)
-app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
-});
+// 5. Rutas directas para el portal web docente
+app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'public', 'index.html')));
+app.get('/index.html', (req, res) => res.sendFile(path.join(__dirname, 'public', 'index.html')));
+app.get('/register.html', (req, res) => res.sendFile(path.join(__dirname, 'public', 'register.html')));
+app.get('/dashboard.html', (req, res) => res.sendFile(path.join(__dirname, 'public', 'dashboard.html')));
 
-// Servir archivos HTML explícitamente para evitar cualquier "Cannot GET"
-app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
-});
-
-app.get('/index.html', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
-});
-
-app.get('/register.html', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'register.html'));
-});
-
-app.get('/dashboard.html', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'dashboard.html'));
-});
-
-// 5. Iniciar Servidor
+// 6. Iniciar Servidor escuchando en '0.0.0.0' (Crucial para el emulador Android)
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
+
+app.listen(PORT, '0.0.0.0', () => {
   console.log(`===============================================`);
   console.log(`🚀 Servidor ejecutándose en: http://localhost:${PORT}`);
+  console.log(`📡 Escuchando en 0.0.0.0:${PORT} (Listo para Emulador Android)`);
   console.log(`💻 Web Docente lista en: http://localhost:${PORT}/index.html`);
   console.log(`📱 Endpoints de Android en: http://localhost:${PORT}/api/`);
   console.log(`===============================================`);
