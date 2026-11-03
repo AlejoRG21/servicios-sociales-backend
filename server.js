@@ -15,7 +15,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
 
 // 3. Conexión a MongoDB (Usa variable en .env o base de datos local por defecto)
-const MONGO_URI = 'mongodb+srv://cesarriverag_db_user:c9lQ0DhdEzI72PYp@cluster0.wytr1os.mongodb.net/servicios_sociales?retryWrites=true&w=majority';
+const MONGO_URI = 'mongodb+srv://cesarriverag_db_user:Zahir412@cluster0.wytr1os.mongodb.net/servicios_sociales?retryWrites=true&w=majority';
 
 mongoose.connect(MONGO_URI)
   .then(() => console.log('✅ Conectado exitosamente a MongoDB'))
