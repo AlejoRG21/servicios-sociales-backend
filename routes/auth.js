@@ -135,5 +135,16 @@ router.post('/login', async (req, res) => {
   }
 });
 
+// Obtener todos los usuarios registrados (Estudiantes y Profesores)
+router.get('/users', async (req, res) => {
+  try {
+    // Busca todos los usuarios ocultando la contraseña por seguridad (-password)
+    const users = await User.find().select('-password').sort({ createdAt: -1 });
+    res.json(users);
+  } catch (error) {
+    res.status(500).json({ message: 'Error al consultar usuarios', error: error.message });
+  }
+});
+
 // 👉 MUY IMPORTANTE: SIEMPRE EXPORTAR EL ROUTER AL FINAL
 module.exports = router;
