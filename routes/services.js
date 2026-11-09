@@ -25,10 +25,21 @@ try {
 }
 
 // 1. Obtener TODAS las solicitudes (Para que las aprobadas no desaparezcan)
+// 1. Obtener solicitudes (Si viene con correo/nombre filtra para el alumno, si no, entrega todo al docente)
 router.get('/pending', async (req, res) => {
   try {
-    // 👉 find() sin filtros para traer Pendientes, Aprobadas y Rechazadas
-    const services = await Service.find().sort({ createdAt: -1 });
+    const { studentEmail, studentName } = req.query;
+    let filter = {};
+
+    // Si la app móvil envía el correo o nombre del alumno logueado, filtra solo sus horas:
+    if (studentEmail || studentName) {
+      filter.$or = [
+        ...(studentEmail ? [{ studentEmail }] : []),
+        ...(studentName ? [{ studentName }] : [])
+      ];
+    }
+
+    const services = await Service.find(filter).sort({ createdAt: -1 });
     res.json(services);
   } catch (error) {
     res.status(500).json({ message: 'Error al obtener registros', error });
