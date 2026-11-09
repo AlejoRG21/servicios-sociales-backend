@@ -8,8 +8,9 @@ const app = express();
 
 // 1. Middlewares obligatorios
 app.use(cors()); // Permite peticiones desde Android Studio y la web
-app.use(express.json()); // Permite recibir cuerpos JSON en POST/PUT
-app.use(express.urlencoded({ extended: true }));
+// Aumentar el límite a 15MB para soportar fotos de evidencia en Base64
+app.use(express.json({ limit: '15mb' }));
+app.use(express.urlencoded({ limit: '15mb', extended: true }));
 
 // 2. Servir la carpeta de la web docente
 app.use(express.static(path.join(__dirname, 'public')));
