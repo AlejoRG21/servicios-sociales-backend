@@ -86,4 +86,43 @@ router.patch('/:id/status', async (req, res) => {
   }
 });
 
+// 4. Modificar una solicitud pendiente (Solo si aún no ha sido evaluada)
+router.put('/:id', async (req, res) => {
+  try {
+    const service = await Service.findById(req.params.id);
+    if (!service) return res.status(404).json({ message: 'Solicitud no encontrada' });
+
+    if (service.status !== 'PENDING') {
+      return res.status(400).json({ message: 'Solo puedes modificar solicitudes en estado Pendiente' });
+    }
+
+    const { organization, hours, date, description } = req.body;
+    const updated = await Service.findByIdAndUpdate(
+      req.params.id,
+      { organization, hours, date, description },
+      { new: true }
+    );
+    res.json(updated);
+  } catch (error) {
+    res.status(500).json({ message: 'Error al actualizar solicitud', error: error.message });
+  }
+});
+
+// 5. Cancelar / Eliminar una solicitud pendiente
+router.delete('/:id', async (req, res) => {
+  try {
+    const service = await Service.findById(req.params.id);
+    if (!service) return res.status(404).json({ message: 'Solicitud no encontrada' });
+
+    if (service.status !== 'PENDING') {
+      return res.status(400).json({ message: 'No puedes cancelar una solicitud que ya fue evaluada' });
+    }
+
+    await Service.findByIdAndDelete(req.params.id);
+    res.json({ message: 'Solicitud cancelada exitosamente' });
+  } catch (error) {
+    res.status(500).json({ message: 'Error al cancelar solicitud', error: error.message });
+  }
+});
+
 module.exports = router;
